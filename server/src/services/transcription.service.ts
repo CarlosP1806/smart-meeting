@@ -10,7 +10,12 @@ export const transcribeAudio = async (
   numSpeakers: number,
   speakerMap: Map<number, number>
 ) => {
-  const client = new v1p1beta1.SpeechClient();
+  const client = new v1p1beta1.SpeechClient({
+    credentials: {
+      client_email: process.env.GCLOUD_MAIL,
+      private_key: process.env.GCLOUD_PRIVATE_KEY?.replace(/\\n/g, "\n"),
+    },
+  });
   const audio = {
     content: fileBuffer.toString("base64"),
   };
