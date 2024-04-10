@@ -1,0 +1,42 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id          Int           @id @default(autoincrement())
+  email       String        @unique
+  name        String
+  password    String
+  meetings    MeetingUser[]
+  voiceRecord VoiceRecord?
+}
+
+model VoiceRecord {
+  id       Int      @id @default(autoincrement())
+  userId   Int      @unique
+  filename String
+  user     User     @relation(fields: [userId], references: [id])
+}
+
+model Meeting {
+  id            Int           @id @default(autoincrement())
+  title         String
+  date          DateTime
+  ownerId       Int
+  transcription String
+  users         MeetingUser[]
+}
+
+model MeetingUser {
+  userId    Int
+  meetingId Int
+  accepted  Boolean
+  user      User            @relation(fields: [userId], references: [id])
+  meeting   Meeting         @relation(fields: [meetingId], references: [id])
+  @@id([userId, meetingId]) 
+}
