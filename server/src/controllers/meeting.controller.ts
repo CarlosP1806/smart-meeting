@@ -66,9 +66,11 @@ export const getTranscription = async (
     const userIds = meeting.users.map((user) => user.userId);
     const refRecNames = userIds.map((id) => `${id}-reference.wav`);
     const fileBuffers: Buffer[] = [];
+    const speakerMap = new Map<number, number>();
 
     for (let i = 0; i < userIds.length; i++) {
       const refRec = await FileService.getFileBuffer(refRecNames[i]);
+      speakerMap.set(i + 1, userIds[i]);
       if (!refRec) {
         return res.status(400).json({ error: "Missing reference recording" });
       }
@@ -85,7 +87,11 @@ export const getTranscription = async (
     const merged = await TranscriptionService.concatenateAudio(audioBuffers);
 
     const { transcription, diarization } =
-      await TranscriptionService.transcribeAudio(merged, userIds.length);
+      await TranscriptionService.transcribeAudio(
+        merged,
+        userIds.length,
+        speakerMap
+      );
     res.status(200).json({ transcription, diarization });
   } catch (error: any) {
     console.log(error);

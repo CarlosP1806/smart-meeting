@@ -7,7 +7,8 @@ type DiarizationResult = {
 
 export const transcribeAudio = async (
   fileBuffer: Buffer,
-  numSpeakers: number
+  numSpeakers: number,
+  speakerMap: Map<number, number>
 ) => {
   const client = new v1p1beta1.SpeechClient();
   const audio = {
@@ -43,7 +44,7 @@ export const transcribeAudio = async (
     return { speaker: a.speakerTag, words: a.word };
   });
 
-  const formattedDiarization = formatDiarization(diarization);
+  const formattedDiarization = formatDiarization(diarization, speakerMap);
 
   return { transcription, diarization: formattedDiarization };
 };
@@ -51,7 +52,8 @@ export const transcribeAudio = async (
 // Receives a diarization word by word
 // Returns a diarization formatted as a list of speakers with their corresponding words
 export const formatDiarization = (
-  diarization: DiarizationResult[]
+  diarization: DiarizationResult[],
+  speakerMap: Map<number, number>
 ): DiarizationResult[] => {
   const formattedDiarization = [] as DiarizationResult[];
   let currentSpeakerTag = diarization[0].speaker;
@@ -63,8 +65,11 @@ export const formatDiarization = (
     } else {
       // Give format to string
       currentSpeakerWords = currentSpeakerWords.trim();
+      const speaker = currentSpeakerTag
+        ? speakerMap.get(currentSpeakerTag)
+        : undefined;
       formattedDiarization.push({
-        speaker: currentSpeakerTag,
+        speaker: speaker || -1,
         words: currentSpeakerWords,
       });
 
@@ -75,8 +80,11 @@ export const formatDiarization = (
 
   // Add the last speaker
   currentSpeakerWords = currentSpeakerWords.trim();
+  const speaker = currentSpeakerTag
+    ? speakerMap.get(currentSpeakerTag)
+    : undefined;
   formattedDiarization.push({
-    speaker: currentSpeakerTag,
+    speaker: speaker || -1,
     words: currentSpeakerWords,
   });
 
