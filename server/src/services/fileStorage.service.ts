@@ -1,45 +1,46 @@
 import multer from "multer";
-import { Storage } from "@google-cloud/storage";
 import dotenv from "dotenv";
+import {
+  GetObjectCommand,
+  PutObjectCommand,
+  S3Client,
+} from "@aws-sdk/client-s3";
 dotenv.config();
 
 export const upload = multer({ storage: multer.memoryStorage() });
-const storage = new Storage();
-const bucket = storage.bucket(process.env.GCLOUD_STORAGE_BUCKET as string);
 
-// Upload file to GCP via streams
+const client = new S3Client({});
+
+// Upload file to AWS S3
 export const uploadFile = async (file: Express.Multer.File): Promise<void> => {
-  return new Promise((resolve, reject) => {
-    if (!file || !file.buffer) {
-      reject("No file content");
-      return;
-    }
+  if (!file || !file.buffer) {
+    throw new Error("No file content");
+  }
 
-    const blob = bucket.file(file.originalname);
-    const stream = blob.createWriteStream();
-
-    stream.on("error", reject);
-    stream.on("finish", () => {
-      resolve();
-    });
-    stream.end(file.buffer);
+  const uploadCommand = new PutObjectCommand({
+    Bucket: process.env.AWS_BUCKET_NAME,
+    Key: file.originalname,
+    Body: file.buffer,
   });
+
+  try {
+    await client.send(uploadCommand);
+  } catch (error: any) {
+    throw new Error("Cannot upload file");
+  }
 };
 
-// Get file buffer from GCP
+// Get file buffer from AWS S3
 export const getFileBuffer = async (filename: string): Promise<Buffer> => {
-  return new Promise((resolve, reject) => {
-    const chunks: Uint8Array[] = [];
-    const stream = bucket.file(filename).createReadStream();
-
-    stream.on("data", (chunk: Uint8Array) => {
-      chunks.push(chunk);
-    });
-
-    stream.on("end", () => {
-      resolve(Buffer.concat(chunks));
-    });
-
-    stream.on("error", reject);
+  const command = new GetObjectCommand({
+    Bucket: process.env.AWS_BUCKET_NAME,
+    Key: filename,
   });
+
+  const response = await client.send(command);
+  if (!response.Body) {
+    throw new Error("Cannot get file");
+  }
+  const bytes = await response.Body.transformToByteArray();
+  return Buffer.from(bytes);
 };

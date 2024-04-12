@@ -10,7 +10,12 @@ export const transcribeAudio = async (
   numSpeakers: number,
   speakerMap: Map<number, number>
 ) => {
-  const client = new v1p1beta1.SpeechClient();
+  const client = new v1p1beta1.SpeechClient({
+    credentials: {
+      client_email: process.env.GCLOUD_MAIL,
+      private_key: process.env.GCLOUD_PRIVATE_KEY?.replace(/\\n/g, "\n"),
+    },
+  });
   const audio = {
     content: fileBuffer.toString("base64"),
   };
@@ -64,7 +69,7 @@ export const formatDiarization = (
       currentSpeakerWords += diarization[i].words + " ";
     } else {
       // Give format to string
-      currentSpeakerWords = currentSpeakerWords.trim();
+      currentSpeakerWords = currentSpeakerWords.trim().toLowerCase();
       const speaker = currentSpeakerTag
         ? speakerMap.get(currentSpeakerTag)
         : undefined;
@@ -79,7 +84,7 @@ export const formatDiarization = (
   }
 
   // Add the last speaker
-  currentSpeakerWords = currentSpeakerWords.trim();
+  currentSpeakerWords = currentSpeakerWords.trim().toLowerCase();
   const speaker = currentSpeakerTag
     ? speakerMap.get(currentSpeakerTag)
     : undefined;
