@@ -69,7 +69,7 @@ export const formatDiarization = (
       currentSpeakerWords += diarization[i].words + " ";
     } else {
       // Give format to string
-      currentSpeakerWords = currentSpeakerWords.trim();
+      currentSpeakerWords = currentSpeakerWords.trim().toLowerCase();
       const speaker = currentSpeakerTag
         ? speakerMap.get(currentSpeakerTag)
         : undefined;
@@ -84,7 +84,7 @@ export const formatDiarization = (
   }
 
   // Add the last speaker
-  currentSpeakerWords = currentSpeakerWords.trim();
+  currentSpeakerWords = currentSpeakerWords.trim().toLowerCase();
   const speaker = currentSpeakerTag
     ? speakerMap.get(currentSpeakerTag)
     : undefined;
