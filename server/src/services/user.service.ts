@@ -44,10 +44,10 @@ export const deleteUser = async (id: number): Promise<User> => {
 };
 
 // ADDITIONAL OPERATIONS
-export const findByName = async (name: string): Promise<User | null> => {
+export const findByName = async (username: string): Promise<User | null> => {
   return db.user.findFirst({
     where: {
-      name,
+      username,
     },
   });
 };

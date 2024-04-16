@@ -15,12 +15,12 @@ export const signUp = async (req: Request, res: Response) => {
       return res.status(400).json({ error: "Missing reference recording" });
     }
 
-    const { email, name, password } = req.body;
+    const { email, username, password } = req.body;
     const voiceFile = req.file;
 
-    const user = await UserService.createUser({ email, name, password });
+    const user = await UserService.createUser({ email, username, password });
     const token = AuthService.signToken({
-      username: user.name,
+      username: user.username,
       email: user.email,
       id: user.id,
     });
@@ -73,7 +73,7 @@ export const login = async (req: Request, res: Response) => {
     }
 
     const token = AuthService.signToken({
-      username: user.name,
+      username: user.username,
       email: user.email,
       id: user.id,
     });

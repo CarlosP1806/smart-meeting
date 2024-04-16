@@ -10,7 +10,7 @@ datasource db {
 model User {
   id          Int           @id @default(autoincrement())
   email       String        @unique
-  name        String
+  username    String
   password    String
   meetings    MeetingUser[]
   voiceRecord VoiceRecord?
@@ -28,7 +28,6 @@ model Meeting {
   title         String
   date          DateTime
   ownerId       Int
-  transcription String
   users         MeetingUser[]
 }
 
