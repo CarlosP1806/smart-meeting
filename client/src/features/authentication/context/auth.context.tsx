@@ -23,7 +23,7 @@ export const AuthProvider = ({ children }: IAuthProviderProps) => {
 
   useEffect(() => {
     setIsLoadingUser(true);
-    // get logged in user
+    AuthService.getCurrentUser().then((res) => console.log("user", res));
   }, []);
 
   function login(username: string, password: string) {

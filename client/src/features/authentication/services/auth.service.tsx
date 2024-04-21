@@ -9,3 +9,7 @@ export const login = async (username: string, password: string) => {
 export const signup = async (form: FormData) => {
   return baseApi.post("/users/signup", form).then((res) => res.data);
 };
+
+export const getCurrentUser = async () => {
+  return baseApi.get("/users").then((res) => res.data);
+};

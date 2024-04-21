@@ -62,7 +62,8 @@ export const signUp = async (req: Request, res: Response) => {
 // Log in a user and return a JWT
 export const login = async (req: Request, res: Response) => {
   try {
-    const user = await UserService.findByName(req.body.name);
+    const user = await UserService.findByName(req.body.username);
+    console.log(user);
     if (!user) {
       return res.status(404).json({ error: "User not found" });
     }
@@ -87,5 +88,25 @@ export const login = async (req: Request, res: Response) => {
     res.status(200).json({ user, token });
   } catch (error: any) {
     return res.status(500).json({ error: "An unexpected error occurred" });
+  }
+};
+
+// Get the current user
+export const getCurrentUser = async (
+  req: AuthService.AuthRequest,
+  res: Response
+) => {
+  try {
+    if (!req.userId) {
+      return res.status(401).json({ error: "Unauthorized" });
+    }
+    const user = await UserService.getUserById(req.userId as number);
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+    res.status(200).json(user);
+  } catch (error: any) {
+    console.log(error);
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 };
